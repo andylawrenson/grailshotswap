@@ -31,6 +31,7 @@ import net.labymod.intellij.singlehotswap.storage.SingleHotswapConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -151,21 +152,20 @@ public class SingleHotswapAction extends CompileAction {
                         try {
                             long start = System.currentTimeMillis();
 
-                            // Compile the current opened file
-                            List<ClassFile> classFiles = compiler.compile(module, sourceFile, outputFile);
-                            if (classFiles.isEmpty()) {
-                                String message = "Could not compile " + psiFile.getName();
-                                progress.addMessage(debugger, MessageCategory.ERROR, message);
-                                return;
-                            }
+                            // do not compile, assume Grails will have re-compiles
+                            List<ClassFile> classFiles = new ArrayList<>();
 
-                            // Show compile duration
-                            long duration = System.currentTimeMillis() - start;
-                            if (this.configuration.isShowCompileDuration()) {
-                                String message = "Compiled " + classFiles.size() + " classes in " + duration + "ms";
-                                progress.addMessage(debugger, MessageCategory.STATISTICS, message);
-                            }
+                            // Add the (compiled) output file to the list
+                            classFiles.add(outputFile);
+
+                            // Add the inner class files to the list
+                            classFiles.addAll(context.getInnerClassFiles(outputFile));
+
                             progress.setTitle("Hotswap classes...");
+                            for(ClassFile classFile: classFiles) {
+                                String message = "Hotswapping " + classFile.getFile().toString() + " without recompilation";
+                                progress.addMessage(debugger, MessageCategory.INFORMATION, message);
+                            }
 
                             // Hotswap the file
                             if (!context.hotswap(debugger, progress, classFiles)) {

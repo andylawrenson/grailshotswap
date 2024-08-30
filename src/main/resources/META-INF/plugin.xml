@@ -1,12 +1,15 @@
 <idea-plugin>
-    <id>net.labymod.intellij.singlehotswap</id>
-    <name>Single Hotswap</name>
-    <version>2.9</version>
-    <vendor email="labystudio@gmail.com" url="https://www.labymod.net">LabyMedia</vendor>
+    <id>io.anthropos.grailshotswap</id>
+    <name>Grails Hotswap</name>
+    <version>1.0</version>
+    <vendor email="andy.lawrenson@anthropos.op" url="https://www.anthropos.io">Anthropos</vendor>
 
     <idea-version since-build="203.000"/>
 
     <description><![CDATA[
+
+    Forked from net.labymod.intellij.singlehotswap by LabyMedia / labystudio@gmail.com
+
     With this plugin you can hotswap <b>50x faster</b> than usual by hotswapping <b>only the file opened</b> in the editor with the <b>internal compiler</b> of IntelliJ.
     The builtin feature of Intellij "Compile and Reload" always reloads every single file that is referenced by the target class.<br>
     Therefore, this plugin gives you a better control what exactly you want to hotswap.<br>

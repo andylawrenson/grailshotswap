@@ -13,6 +13,8 @@ import net.labymod.intellij.singlehotswap.compiler.impl.DefaultCompiler;
 import net.labymod.intellij.singlehotswap.hotswap.ClassFile;
 import net.labymod.intellij.singlehotswap.hotswap.Context;
 import net.labymod.intellij.singlehotswap.storage.SingleHotswapConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,6 +30,8 @@ import java.util.Map;
  * @author LabyStudio
  */
 public abstract class AbstractContext<T> implements Context {
+
+    final static Logger log = LoggerFactory.getLogger(AbstractContext.class);
 
     @Override
     public AbstractCompiler compiler(SingleHotswapConfiguration configuration, boolean forceDefault) {
@@ -78,6 +82,7 @@ public abstract class AbstractContext<T> implements Context {
         // Iterate inner classes
         for (File fileInPackage : filesInPackage) {
             String innerFullClassName = fileInPackage.getName();
+            log.debug("innerFullClassName = {}, package = {}", innerFullClassName, classFile.getPackageName());
 
             // Check if it's a static kotlin file
             if (innerFullClassName.equals(classFile.getClassName() + "Kt.class")) {
@@ -95,6 +100,18 @@ public abstract class AbstractContext<T> implements Context {
                 continue;
             }
 
+            if (innerFullClassName.contains("_closure") && innerFullClassName.endsWith(".class")) {
+                String closureClassName = innerFullClassName.substring(0, innerFullClassName.lastIndexOf(".class"));
+                log.debug("closureClassName = {}", closureClassName);
+                innerClasses.add(new ClassFile(
+                        classFile.getProject(),
+                        fileInPackage,
+                        classFile.getPackageName(),
+                        closureClassName
+                ));
+                continue;
+            }
+
             // Check if it's a class file
             String innerFileName = innerFullClassName.split("\\$")[1];
             if (!innerFileName.contains(".class")) {
@@ -103,6 +120,7 @@ public abstract class AbstractContext<T> implements Context {
 
             String subClassName = innerFileName.substring(0, innerFileName.lastIndexOf(".class"));
             String innerClassName = classFile.getClassName() + "$" + subClassName;
+            log.debug("subClassName = {}, innerClassName = {}", subClassName, innerClassName);
 
             // Collect the inner class of the target class
             innerClasses.add(new ClassFile(
